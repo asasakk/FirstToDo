@@ -1,61 +1,86 @@
-//
-//  ContentView.swift
-//  FirstToDo
-//
-//  Created by asai on 2025/11/26.
-//
-
 import SwiftUI
 import SwiftData
+import AppTrackingTransparency // ★追加
+import AdSupport               // ★追加
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
-
+    @Environment(\.scenePhase) private var scenePhase
+    @Query private var allItems: [ToDoItem]
+    
+    @AppStorage("appearanceMode") private var appearanceMode: Int = 0
+    @AppStorage("notifyAt8") private var notifyAt8: Bool = false
+    @AppStorage("notifyAt12") private var notifyAt12: Bool = false
+    @AppStorage("notifyAt17") private var notifyAt17: Bool = false
+    
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
-                }
-                .onDelete(perform: deleteItems)
+        VStack(spacing: 0){
+            TabView {
+                HomeView()
+                    .tabItem { Label("ホーム", systemImage: "house") }
+                
+                TaskListView()
+                    .tabItem { Label("一覧", systemImage: "list.bullet") }
+                
+                StatisticsView()
+                    .tabItem { Label("統計", systemImage: "chart.pie.fill") }
             }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
+            .preferredColorScheme(selectedScheme)
+            
+            .onChange(of: scenePhase) { _, newPhase in
+                if newPhase == .background {
+                    updateNotifications()
                 }
             }
-        } detail: {
-            Text("Select an item")
+            
+            AdBannerView()
+                .frame(width: 320, height: 50)
+        }
+        // ★追加: ここで呼び出す
+        .onAppear {
+            requestIDFA()
         }
     }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
+    
+    var selectedScheme: ColorScheme? {
+        switch appearanceMode {
+        case 1: return .light
+        case 2: return .dark
+        default: return nil
         }
     }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+    
+    private func updateNotifications() {
+        let calendar = Calendar.current
+        let todayRemainingCount = allItems.filter {
+            calendar.isDateInToday($0.date) && !$0.isCompleted
+        }.count
+        
+        NotificationManager.shared.scheduleNotifications(
+            taskCount: todayRemainingCount,
+            notifyAt8: notifyAt8,
+            notifyAt12: notifyAt12,
+            notifyAt17: notifyAt17
+        )
+    }
+    
+    // ★追加: ポップアップ表示ロジック
+    func requestIDFA() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            ATTrackingManager.requestTrackingAuthorization { status in
+                switch status {
+                case .authorized:
+                    print("トラッキング: 許可されました")
+                case .denied:
+                    print("トラッキング: 拒否されました")
+                case .notDetermined:
+                    print("トラッキング: 未選択")
+                case .restricted:
+                    print("トラッキング: 制限されています")
+                @unknown default:
+                    break
+                }
             }
         }
     }
-}
-
-#Preview {
-    ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
 }
