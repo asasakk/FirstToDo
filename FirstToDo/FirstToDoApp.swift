@@ -5,6 +5,10 @@ import WidgetKit
 
 @main
 struct ToDoApp: App {
+    // ★追加: 設定画面で保存した値を読み込む
+    @AppStorage("language") private var language: String = "ja" // デフォルトは日本語
+    @AppStorage("appearanceMode") private var appearanceMode: Int = 0 // 0:自動, 1:ライト, 2:ダーク
+
     // コンテナをカスタマイズして作成
     let sharedModelContainer: ModelContainer = {
         let schema = Schema([ToDoItem.self])
@@ -27,6 +31,10 @@ struct ToDoApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                // ★追加: アプリ全体の言語を強制的に上書き
+                .environment(\.locale, Locale(identifier: language))
+                // ★追加: アプリ全体の外観モードを強制的に上書き
+                .preferredColorScheme(appearanceMode == 0 ? nil : (appearanceMode == 1 ? .light : .dark))
         }
         .modelContainer(sharedModelContainer) // カスタマイズしたコンテナを適用
         // ★アプリがバックグラウンドに行った時、ウィジェットを更新する

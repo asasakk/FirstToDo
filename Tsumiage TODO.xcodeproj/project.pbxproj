@@ -13,6 +13,7 @@
 		461A65B72ED6CFFB002258B1 /* プライバシーポリシー.md in Resources */ = {isa = PBXBuildFile; fileRef = 461A65B62ED6CFEF002258B1 /* プライバシーポリシー.md */; };
 		461A65B92ED6D0C3002258B1 /* 利用規約.md in Resources */ = {isa = PBXBuildFile; fileRef = 461A65B82ED6D0BD002258B1 /* 利用規約.md */; };
 		461A65C02ED6D891002258B1 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 461A65BF2ED6D891002258B1 /* GoogleMobileAds */; };
+		461A65C22ED718D0002258B1 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 461A65C12ED718D0002258B1 /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,6 +48,7 @@
 		461A65B12ED6B9E5002258B1 /* ToDoWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ToDoWidgetExtension.entitlements; sourceTree = "<group>"; };
 		461A65B62ED6CFEF002258B1 /* プライバシーポリシー.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "プライバシーポリシー.md"; sourceTree = "<group>"; };
 		461A65B82ED6D0BD002258B1 /* 利用規約.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "利用規約.md"; sourceTree = "<group>"; };
+		461A65C12ED718D0002258B1 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -117,6 +119,7 @@
 		461A654A2ED687F9002258B1 = {
 			isa = PBXGroup;
 			children = (
+				461A65C12ED718D0002258B1 /* Localizable.xcstrings */,
 				461A65B62ED6CFEF002258B1 /* プライバシーポリシー.md */,
 				461A65B82ED6D0BD002258B1 /* 利用規約.md */,
 				461A65B12ED6B9E5002258B1 /* ToDoWidgetExtension.entitlements */,
@@ -214,10 +217,12 @@
 				};
 			};
 			buildConfigurationList = 461A654E2ED687F9002258B1 /* Build configuration list for PBXProject "Tsumiage TODO" */;
-			developmentRegion = en;
+			developmentRegion = ja;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
+				ja,
 			);
 			mainGroup = 461A654A2ED687F9002258B1;
 			minimizedProjectReferenceProxies = 1;
@@ -242,6 +247,7 @@
 			files = (
 				461A65B92ED6D0C3002258B1 /* 利用規約.md in Resources */,
 				461A65B72ED6CFFB002258B1 /* プライバシーポリシー.md in Resources */,
+				461A65C22ED718D0002258B1 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -340,6 +346,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -397,6 +404,7 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -415,11 +423,11 @@
 				INFOPLIST_FILE = FirstToDo/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Tsumiage;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "許可すると、あなたの興味・関心に合わせた適切な広告が表示されるようになります。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -451,11 +459,11 @@
 				INFOPLIST_FILE = FirstToDo/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Tsumiage;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "許可すると、あなたの興味・関心に合わせた適切な広告が表示されるようになります。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

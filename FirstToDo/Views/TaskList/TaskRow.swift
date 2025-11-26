@@ -38,15 +38,17 @@ struct TaskRow: View {
             
             // 重要度とカテゴリのバッジ
             VStack(alignment: .trailing) {
-                Text(item.category.rawValue)
+                Text(item.category.localizedName)
                     .font(.caption2)
                     .padding(4)
                     .background(Color.blue.opacity(0.1))
                     .cornerRadius(4)
                 
-                Text("重要: \(item.priority.title)")
-                    .font(.caption2)
-                    .foregroundColor(item.priority == .high ? .red : .primary)
+                HStack(spacing: 0) {
+                    Text("重要: ")
+                    Text(item.priority.title)}
+                .font(.caption2)
+                .foregroundColor(item.priority == .high ? .red : .primary)
             }
         }
     }

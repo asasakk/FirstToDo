@@ -3,6 +3,8 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
     
+    @AppStorage("language") private var language: String = "ja"
+    
     @AppStorage("appearanceMode") private var appearanceMode: Int = 0 // 0:Auto, 1:Light, 2:Dark
     @AppStorage("notifyAt8") private var notifyAt8: Bool = false
     @AppStorage("notifyAt12") private var notifyAt12: Bool = false
@@ -11,6 +13,14 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             List {
+                
+                Section(header: Text("言語 / Language")) {
+                    Picker("表示言語", selection: $language) {
+                        Text("日本語").tag("ja")
+                        Text("English").tag("en")
+                    }
+                    .pickerStyle(.menu)
+                }
                 // --- 外観設定 ---
                 Section(header: Text("外観")) {
                     Picker("テーマ", selection: $appearanceMode) {
@@ -77,7 +87,7 @@ struct SettingsView: View {
                     HStack {
                         Text("バージョン")
                         Spacer()
-                        Text("1.0.0")
+                        Text("1.0.1")
                             .foregroundStyle(.secondary)
                     }
                 }

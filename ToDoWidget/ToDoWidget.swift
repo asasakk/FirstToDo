@@ -23,7 +23,7 @@ enum WidgetCategory: String, AppEnum {
         ]
     }
     
-    var displayName: String {
+    var displayName: LocalizedStringResource {
         switch self {
         case .all: return "全体"
         case .work: return "仕事"

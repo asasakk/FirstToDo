@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import SwiftUI
 
 // カテゴリ定義
 enum Category: String, Codable, CaseIterable, Identifiable {
@@ -8,8 +9,19 @@ enum Category: String, Codable, CaseIterable, Identifiable {
     case shopping = "買い物"
     
     var id: String { self.rawValue }
+    
+    var localizedName: LocalizedStringKey {
+        LocalizedStringKey(self.rawValue)
+    }
+    
+    var localizedString: String {
+            switch self {
+            case .work: return String(localized: "仕事")
+            case .privateLife: return String(localized: "プライベート")
+            case .shopping: return String(localized: "買い物")
+            }
+        }
 }
-
 // 重要度定義
 enum Priority: Int, Codable, CaseIterable, Identifiable, Comparable {
     case low = 1    // 低
@@ -18,7 +30,7 @@ enum Priority: Int, Codable, CaseIterable, Identifiable, Comparable {
     
     var id: Int { self.rawValue }
     
-    var title: String {
+    var title: LocalizedStringKey {
         switch self {
         case .low: return "低"
         case .medium: return "中"
