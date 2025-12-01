@@ -4,50 +4,65 @@ import Charts
 
 // 統計の期間選択用
 enum StatRange: String, CaseIterable, Identifiable {
-    case week = "今週"
-    case month = "今月"
-    case all = "全期間"
+    case week = "week"
+    case month = "month"
+    case all = "all"
     
     var id: String { self.rawValue }
     
-    var localizedString: String {
+    // View内で翻訳するためのキーを返す
+    var localizedKey: LocalizedStringKey {
         switch self {
-        case .week: return String(localized: "今週")
-        case .month: return String(localized: "今月")
-        case .all: return String(localized: "全期間")
+        case .week: return "今週"
+        case .month: return "今月"
+        case .all: return "全期間"
         }
     }
 }
 
 struct StatisticsView: View {
+    @Environment(\.modelContext) private var modelContext
     @Query private var allItems: [ToDoItem]
+    
+    // アプリの言語設定
+    @AppStorage("language") private var language: String = "ja"
+    
+    // 現在の言語設定に基づいたロケール
+    private var targetLocale: Locale {
+        Locale(identifier: language)
+    }
     
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 24) {
                     // 1. 今日の進捗カード
-                    TodayProgressView(allItems: allItems)
+                    TodayProgressView(allItems: allItems, locale: targetLocale)
                     
                     // 2. 週間アクティビティカード
-                    WeeklyActivityView(allItems: allItems)
+                    WeeklyActivityView(allItems: allItems, locale: targetLocale)
                     
                     // 3. カテゴリ別割合カード
-                    CategoryBreakdownView(allItems: allItems)
+                    CategoryBreakdownView(allItems: allItems, locale: targetLocale)
                     
                     Color.clear.frame(height: 50)
                 }
                 .padding()
             }
-            .navigationTitle("統計レポート")
+            .navigationTitle(Text("統計レポート"))
             .background(Color(.systemGroupedBackground))
         }
+        // アプリ全体のロケールを強制適用
+        .environment(\.locale, targetLocale)
+        // 言語変更時にViewを再構築させるID
+        .id(language)
     }
 }
 
 // MARK: - 1. 今日の進捗 View
 struct TodayProgressView: View {
     let allItems: [ToDoItem]
+    let locale: Locale
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -60,13 +75,13 @@ struct TodayProgressView: View {
             HStack {
                 Chart {
                     SectorMark(
-                        angle: .value("完了", stats.completed),
+                        angle: .value(Text("完了"), stats.completed),
                         innerRadius: .ratio(0.6), angularInset: 2
                     )
                     .foregroundStyle(Color.blue.gradient)
                     
                     SectorMark(
-                        angle: .value("未完了", stats.remaining),
+                        angle: .value(Text("未完了"), stats.remaining),
                         innerRadius: .ratio(0.6), angularInset: 2
                     )
                     .foregroundStyle(Color.gray.opacity(0.2))
@@ -81,7 +96,6 @@ struct TodayProgressView: View {
                         .foregroundStyle(.secondary)
                     
                     if stats.total > 0 {
-                        // 計算を明確に分けることでコンパイラの負担を減らす
                         let progress = Double(stats.completed) / Double(stats.total)
                         let percentage = Int(progress * 100)
                         
@@ -101,7 +115,9 @@ struct TodayProgressView: View {
     }
     
     private func calculateTodayStats() -> (total: Int, completed: Int, remaining: Int) {
-        let calendar = Calendar.current
+        var calendar = Calendar.current
+        calendar.locale = locale
+        
         let todayItems = allItems.filter { calendar.isDateInToday($0.date) }
         let total = todayItems.count
         let completed = todayItems.filter { $0.isCompleted }.count
@@ -112,8 +128,10 @@ struct TodayProgressView: View {
 // MARK: - 2. 週間アクティビティ View
 struct WeeklyActivityView: View {
     let allItems: [ToDoItem]
+    let locale: Locale
     
-    // データ構造
+    @AppStorage("language") private var language: String = "ja"
+    
     struct StackedData: Identifiable {
         let id = UUID()
         let date: Date
@@ -129,17 +147,19 @@ struct WeeklyActivityView: View {
             
             let weeklyData = calculateWeeklyStackedStats()
             
-            Chart(weeklyData, id: \.id) { data in
-                BarMark(
-                    x: .value("日付", data.date, unit: .day),
-                    y: .value("完了数", data.count)
-                )
-                .foregroundStyle(by: .value("Category", data.category.localizedString))
+            Chart {
+                ForEach(weeklyData) { data in
+                    BarMark(
+                        x: .value("日付", data.date, unit: .day),
+                        y: .value("完了数", data.count)
+                    )
+                    .foregroundStyle(by: .value("Category", categoryString(data.category)))
+                }
             }
             .chartForegroundStyleScale([
-                Category.work.localizedString: .blue,
-                Category.privateLife.localizedString: .green,
-                Category.shopping.localizedString: .orange
+                categoryString(.work): .blue,
+                categoryString(.privateLife): .green,
+                categoryString(.shopping): .orange
             ])
             .chartXAxis {
                 AxisMarks(values: .stride(by: .day)) { _ in
@@ -153,8 +173,17 @@ struct WeeklyActivityView: View {
         .cornerRadius(16)
     }
     
+    private func categoryString(_ category: Category) -> String {
+        switch category {
+        case .work: return language == "en" ? "Work" : "仕事"
+        case .privateLife: return language == "en" ? "Personal" : "プライベート"
+        case .shopping: return language == "en" ? "Shopping" : "買い物"
+        }
+    }
+    
     private func calculateWeeklyStackedStats() -> [StackedData] {
-        let calendar = Calendar.current
+        var calendar = Calendar.current
+        calendar.locale = locale
         let today = calendar.startOfDay(for: Date())
         var stats: [StackedData] = []
         
@@ -178,6 +207,10 @@ struct WeeklyActivityView: View {
 // MARK: - 3. カテゴリ別割合 View
 struct CategoryBreakdownView: View {
     let allItems: [ToDoItem]
+    let locale: Locale
+    
+    @AppStorage("language") private var language: String = "ja"
+    
     @State private var selectedRange: StatRange = .all
     
     struct CategoryCount {
@@ -194,7 +227,7 @@ struct CategoryBreakdownView: View {
                 Spacer()
                 Picker("期間", selection: $selectedRange) {
                     ForEach(StatRange.allCases) { range in
-                        Text(range.localizedString).tag(range)
+                        Text(range.localizedKey).tag(range)
                     }
                 }
                 .pickerStyle(.menu)
@@ -219,27 +252,39 @@ struct CategoryBreakdownView: View {
                             innerRadius: .ratio(0.0),
                             angularInset: 1
                         )
-                        .foregroundStyle(by: .value("Category", data.category.localizedString))
+                        .foregroundStyle(by: .value("Category", categoryString(data.category)))
                     }
                     .chartForegroundStyleScale([
-                        Category.work.localizedString: .blue,
-                        Category.privateLife.localizedString: .green,
-                        Category.shopping.localizedString: .orange
+                        categoryString(.work): .blue,
+                        categoryString(.privateLife): .green,
+                        categoryString(.shopping): .orange
                     ])
                     .frame(height: 150)
                     
-                    // 凡例
+                    // リスト形式の凡例
                     VStack(alignment: .leading, spacing: 8) {
-                        ForEach(categoryData, id: \.category) { data in
+                        ForEach(Category.allCases) { category in
                             HStack {
                                 Circle()
-                                    .fill(categoryColor(data.category))
+                                    .fill(categoryColor(category))
                                     .frame(width: 8, height: 8)
-                                Text(data.category.localizedString)
+                                
+                                Text(categoryString(category))
                                     .font(.caption)
-                                Text("\(data.count)件")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
+                                    // ★修正: ここで型エラーが出ていたため、Color.primary と Color.gray を使用
+                                    .foregroundStyle(isCategoryActive(category, in: categoryData) ? Color.primary : Color.gray.opacity(0.5))
+                                
+                                // 件数表示
+                                if let match = categoryData.first(where: { $0.category == category }) {
+                                    Text("\(match.count)件")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                } else {
+                                    Text("0件")
+                                        .font(.caption)
+                                        // ★修正: ここも Color.gray を使用
+                                        .foregroundStyle(Color.gray.opacity(0.5))
+                                }
                             }
                         }
                     }
@@ -253,17 +298,29 @@ struct CategoryBreakdownView: View {
         .cornerRadius(16)
     }
     
+    private func isCategoryActive(_ category: Category, in data: [CategoryCount]) -> Bool {
+        return data.contains(where: { $0.category == category })
+    }
+    
+    private func categoryString(_ category: Category) -> String {
+        switch category {
+        case .work: return language == "en" ? "Work" : "仕事"
+        case .privateLife: return language == "en" ? "Personal" : "プライベート"
+        case .shopping: return language == "en" ? "Shopping" : "買い物"
+        }
+    }
+    
     private func categoryColor(_ category: Category) -> Color {
         switch category {
         case .work: return .blue
         case .privateLife: return .green
         case .shopping: return .orange
-        default: return .gray
         }
     }
     
     private func calculateCategoryStats(range: StatRange) -> [CategoryCount] {
-        let calendar = Calendar.current
+        var calendar = Calendar.current
+        calendar.locale = locale
         let now = Date()
         
         let filteredItems = allItems.filter { item in

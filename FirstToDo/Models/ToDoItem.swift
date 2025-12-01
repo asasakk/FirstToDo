@@ -4,24 +4,33 @@ import SwiftUI
 
 // カテゴリ定義
 enum Category: String, Codable, CaseIterable, Identifiable {
+    // rawValue はデータの保存に使われるので「日本語」のまま変更しないこと！
     case work = "仕事"
     case privateLife = "プライベート"
     case shopping = "買い物"
     
     var id: String { self.rawValue }
     
+    // View表示用 (Textなどで使用)
     var localizedName: LocalizedStringKey {
         LocalizedStringKey(self.rawValue)
     }
     
+    // ★修正点: グラフの凡例用 (Stringとして取得)
+    // rawValueを動的に変換するのではなく、明示的に翻訳キーを指定します。
+    // これにより確実に Localizable.xcstrings の中身とマッチします。
     var localizedString: String {
-            switch self {
-            case .work: return String(localized: "仕事")
-            case .privateLife: return String(localized: "プライベート")
-            case .shopping: return String(localized: "買い物")
-            }
+        switch self {
+        case .work:
+            return String(localized: "仕事") // "仕事" -> "Work" に変換される
+        case .privateLife:
+            return String(localized: "プライベート") // "プライベート" -> "Personal" に変換される
+        case .shopping:
+            return String(localized: "買い物") // "買い物" -> "Shopping" に変換される
         }
+    }
 }
+
 // 重要度定義
 enum Priority: Int, Codable, CaseIterable, Identifiable, Comparable {
     case low = 1    // 低
@@ -51,7 +60,7 @@ final class ToDoItem {
     var priority: Priority
     var category: Category
     var isCompleted: Bool
-    var repeatGroupId: UUID? // 繰り返しタスクを識別するためのID
+    var repeatGroupId: UUID?
     
     init(title: String, date: Date, priority: Priority, category: Category, repeatGroupId: UUID? = nil) {
         self.id = UUID()
