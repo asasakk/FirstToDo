@@ -46,9 +46,10 @@ struct SettingsView: View {
                 
                 
                 
-                // 形式: https://apps.apple.com/app/id【あなたのアプリID】?action=write-review　書き換える
+                // 形式: https://apps.apple.com/app/id6755773828?action=write-review　書き換える
+
                 Section(header: Text("アプリについて")) {
-                    Link(destination: URL(string: "https://apps.apple.com/jp/app/")!) {
+                    Link(destination: URL(string: "https://apps.apple.com/app/id6755773828?action=write-review")!) {
                         HStack {
                             Image(systemName: "star.fill")
                                 .foregroundStyle(.yellow) // 星を黄色に
@@ -57,7 +58,7 @@ struct SettingsView: View {
                         }
                     }
                     // Linkを使うと、Safariブラウザで開きます
-                    Link(destination: URL(string: "https://www.google.com")!) {
+                    Link(destination: URL(string: "https://nowa-tech.tokyo/service/tsumiage/policy")!) {
                         HStack {
                             Image(systemName: "hand.raised.fill")
                                 .foregroundStyle(.blue)
@@ -66,7 +67,7 @@ struct SettingsView: View {
                         }
                     }
                     
-                    Link(destination: URL(string: "https://www.google.com")!) {
+                    Link(destination: URL(string: "https://nowa-tech.tokyo/service/tsumiage/terms")!) {
                         HStack {
                             Image(systemName: "doc.text.fill")
                                 .foregroundStyle(.blue)

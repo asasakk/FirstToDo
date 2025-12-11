@@ -36,7 +36,7 @@ struct ContentView: View {
             AdBannerView()
                 .frame(width: 320, height: 50)
         }
-        // ★追加: ここで呼び出す
+
         .onAppear {
             requestIDFA()
         }
