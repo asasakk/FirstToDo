@@ -74,14 +74,15 @@ struct WidgetTask: Identifiable {
 struct Provider: AppIntentTimelineProvider {
     // App Groupを使ったコンテナの設定
     // ★重要: "group.com.yourname.todoapp" をご自身のIDに書き換えてください
-    let modelContainer: ModelContainer = {
+    let modelContainer: ModelContainer? = {
         let schema = Schema([ToDoItem.self])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false, groupContainer: .identifier("group.com.asai.todoapp"))
         
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])
         } catch {
-            fatalError("Widget ModelContainer creation failed: \(error)")
+            print("Widget ModelContainer creation failed: \(error)")
+            return nil
         }
     }()
 
@@ -119,6 +120,7 @@ struct Provider: AppIntentTimelineProvider {
         let tomorrowStart = calendar.date(byAdding: .day, value: 1, to: todayStart)!
         
         // ★修正点: mainContextではなく、この場で作った新しいContextを使う
+        guard let modelContainer = modelContainer else { return (0, []) }
         let context = ModelContext(modelContainer)
         
         let descriptor = FetchDescriptor<ToDoItem>(
@@ -163,7 +165,7 @@ struct SimpleEntry: TimelineEntry {
 
 // MARK: - 3. ウィジェット本体定義
 
-@main
+
 struct ToDoWidget: Widget {
     let kind: String = "ToDoWidget"
 
