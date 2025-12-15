@@ -13,6 +13,9 @@ struct ContentView: View {
     @AppStorage("notifyAt12") private var notifyAt12: Bool = false
     @AppStorage("notifyAt17") private var notifyAt17: Bool = false
     
+    // ★追加: アップデート監視用オブジェクト
+    @StateObject private var updateChecker = UpdateChecker()
+    
     var body: some View {
         VStack(spacing: 0){
             TabView {
@@ -36,9 +39,21 @@ struct ContentView: View {
             AdBannerView()
                 .frame(width: 320, height: 50)
         }
-
+        // ★追加: アップデート通知アラート
+        .alert("アップデートのお知らせ", isPresented: $updateChecker.isUpdateAvailable) {
+            if let url = updateChecker.appStoreURL {
+                Button("更新する") {
+                    UIApplication.shared.open(url)
+                }
+            }
+            Button("あとで", role: .cancel) { }
+        } message: {
+            Text("新しいバージョン (\(updateChecker.latestVersion)) が利用可能です。\n最新機能をご利用いただくためにアップデートをお願いします。")
+        }
         .onAppear {
             requestIDFA()
+            // ★追加: アップデートチェック開始
+            updateChecker.checkForUpdate()
         }
     }
     
