@@ -3,12 +3,18 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
     
+    // 【追加】UpdateCheckerの変更を監視して、画面を自動更新するようにします
+    @ObservedObject private var updateChecker = UpdateChecker.shared
+    
     @AppStorage("language") private var language: String = "ja"
     
     @AppStorage("appearanceMode") private var appearanceMode: Int = 0 // 0:Auto, 1:Light, 2:Dark
     @AppStorage("notifyAt8") private var notifyAt8: Bool = false
     @AppStorage("notifyAt12") private var notifyAt12: Bool = false
     @AppStorage("notifyAt17") private var notifyAt17: Bool = false
+    
+    // 現在のバージョンを取得
+    let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
     
     var body: some View {
         NavigationStack {
@@ -21,6 +27,7 @@ struct SettingsView: View {
                     }
                     .pickerStyle(.menu)
                 }
+                
                 // --- 外観設定 ---
                 Section(header: Text("外観")) {
                     Picker("テーマ", selection: $appearanceMode) {
@@ -33,7 +40,6 @@ struct SettingsView: View {
                 
                 // --- 通知設定 ---
                 Section(header: Text("通知設定 (今日の残タスク)")) {
-                    // iOS 17以降の .onChange 構文に対応 (引数なしでも動作しますが、念のため _ in をつけるか、古い構文の場合はofのみ)
                     Toggle("朝 08:00 に通知", isOn: $notifyAt8)
                         .onChange(of: notifyAt8) { _, _ in requestPermissionIfNeeded() }
                     
@@ -44,20 +50,17 @@ struct SettingsView: View {
                         .onChange(of: notifyAt17) { _, _ in requestPermissionIfNeeded() }
                 }
                 
-                
-                
-                // 形式: https://apps.apple.com/app/id6755773828?action=write-review　書き換える
-
                 Section(header: Text("アプリについて")) {
+                    // IDは実際のアプリIDに置き換えてください
                     Link(destination: URL(string: "https://apps.apple.com/app/id6755773828?action=write-review")!) {
                         HStack {
                             Image(systemName: "star.fill")
-                                .foregroundStyle(.yellow) // 星を黄色に
+                                .foregroundStyle(.yellow)
                             Text("アプリをレビューして応援")
                                 .foregroundColor(.primary)
                         }
                     }
-                    // Linkを使うと、Safariブラウザで開きます
+                    
                     Link(destination: URL(string: "https://nowa-tech.tokyo/service/tsumiage/policy")!) {
                         HStack {
                             Image(systemName: "hand.raised.fill")
@@ -76,20 +79,41 @@ struct SettingsView: View {
                         }
                     }
                 }
+                
                 Section(header: Text("サポート（バグを報告）")) {
                     Link(destination: URL(string: "https://forms.gle/eMSi5cvLC63epdmv5")!) {
                         Text("Googleフォーム")
                     }
-                    // または GoogleフォームのURL
                 }
                 
                 Section(header: Text("その他")) {
-                    // アプリのバージョン表示など
                     HStack {
                         Text("バージョン")
                         Spacer()
-                        Text("1.0.6")
-                            .foregroundStyle(.secondary)
+                        
+                        // アップデートがあるかチェック
+                        if updateChecker.isUpdateAvailable {
+                            VStack(alignment: .trailing) {
+                                Text(currentVersion)
+                                    .foregroundStyle(.secondary)
+                                
+                                // ストアURLがあればリンクとして表示
+                                if let url = updateChecker.appStoreURL {
+                                    Link("最新: \(updateChecker.latestVersion) に更新", destination: url)
+                                        .font(.caption)
+                                        .fontWeight(.bold)
+                                        .foregroundStyle(.red)
+                                } else {
+                                    Text("最新: \(updateChecker.latestVersion)")
+                                        .font(.caption)
+                                        .foregroundStyle(.red)
+                                }
+                            }
+                        } else {
+                            // 最新の場合
+                            Text(currentVersion)
+                                .foregroundStyle(.secondary)
+                        }
                     }
                 }
             }
@@ -102,11 +126,14 @@ struct SettingsView: View {
                     }
                 }
             }
+            // 【重要】画面が表示されたらバージョンチェックを実行
+            .onAppear {
+                updateChecker.checkForUpdate()
+            }
         }
     }
     
     private func requestPermissionIfNeeded() {
-        // いずれかのスイッチがONになったら許可を求める
         if notifyAt8 || notifyAt12 || notifyAt17 {
             NotificationManager.shared.requestPermission()
         }

@@ -9,18 +9,21 @@ struct ToDoApp: App {
     @AppStorage("language") private var language: String = "ja" // デフォルトは日本語
     @AppStorage("appearanceMode") private var appearanceMode: Int = 0 // 0:自動, 1:ライト, 2:ダーク
 
+    // ★追加: App Group IDを定数で管理 (Widgetと合わせるため)
+    private let appGroupID = "group.com.asai.todoapp"
+
     // コンテナをカスタマイズして作成
-    let sharedModelContainer: ModelContainer = {
+    var sharedModelContainer: ModelContainer {
         let schema = Schema([ToDoItem.self])
-        // ★ここ重要: groupContainerを指定してApp Groupを使う設定にする
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false, groupContainer: .identifier("group.com.asai.todoapp"))
+        // ★修正: 定数を使用
+        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false, groupContainer: .identifier(appGroupID))
 
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])
         } catch {
             fatalError("Could not create ModelContainer: \(error)")
         }
-    }()
+    }
     
     init() {
         //テスト用

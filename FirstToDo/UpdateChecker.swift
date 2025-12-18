@@ -4,14 +4,21 @@ import Combine
 
 @MainActor
 class UpdateChecker: ObservableObject {
+    static let shared = UpdateChecker()
+    
     @Published var isUpdateAvailable: Bool = false
     @Published var latestVersion: String = ""
     @Published var appStoreURL: URL?
 
+    private init() {}
+    
+    let appStoreId = "6755773828"
+
     func checkForUpdate() {
         guard let bundleID = Bundle.main.bundleIdentifier,
+              
               let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
-              let url = URL(string: "https://itunes.apple.com/lookup?bundleId=\(bundleID)") else {
+        let url = URL(string: "https://itunes.apple.com/lookup?id=\(appStoreId)&country=jp") else {
             print("UpdateChecker: 必要情報の取得に失敗しました (BundleID または バージョン情報)")
             return
         }

@@ -74,9 +74,12 @@ struct WidgetTask: Identifiable {
 struct Provider: AppIntentTimelineProvider {
     // App Groupを使ったコンテナの設定
     // ★重要: "group.com.yourname.todoapp" をご自身のIDに書き換えてください
-    let modelContainer: ModelContainer? = {
+    // 修正: 定数化
+    private let appGroupID = "group.com.asai.todoapp"
+    
+    var modelContainer: ModelContainer? {
         let schema = Schema([ToDoItem.self])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false, groupContainer: .identifier("group.com.asai.todoapp"))
+        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false, groupContainer: .identifier(appGroupID))
         
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])
@@ -84,7 +87,7 @@ struct Provider: AppIntentTimelineProvider {
             print("Widget ModelContainer creation failed: \(error)")
             return nil
         }
-    }()
+    }
 
     func placeholder(in context: Context) -> SimpleEntry {
         SimpleEntry(date: Date(), category: .all, count: 5, tasks: [

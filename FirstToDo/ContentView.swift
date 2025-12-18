@@ -14,7 +14,7 @@ struct ContentView: View {
     @AppStorage("notifyAt17") private var notifyAt17: Bool = false
     
     // ★追加: アップデート監視用オブジェクト
-    @StateObject private var updateChecker = UpdateChecker()
+    @StateObject private var updateChecker = UpdateChecker.shared
     
     var body: some View {
         VStack(spacing: 0){
